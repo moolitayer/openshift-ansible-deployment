@@ -34,6 +34,7 @@ cp ${ID_FILE} ${WORKSPACE_ID_FILE}
 
 cp ${INVENTORY_FILE} ${MY_INVENTORY_FILE}
 
+echo "openshift_master_default_subdomain=${MASTER_IP}.nip.io" >> ${MY_INVENTORY_FILE}
 echo "oreg_url=openshift/origin-\${component}:${IMAGES_VERSION}" >> ${MY_INVENTORY_FILE}
 echo "[masters]" >> ${MY_INVENTORY_FILE}
 echo "origin-master.${MASTER_IP}.nip.io openshift_hostname=origin-master.${MASTER_IP}.nip.io" >> ${MY_INVENTORY_FILE}
