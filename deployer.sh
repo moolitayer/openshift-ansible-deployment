@@ -34,23 +34,29 @@ cp ${ID_FILE} ${WORKSPACE_ID_FILE}
 
 cp ${INVENTORY_FILE} ${MY_INVENTORY_FILE}
 
-echo "openshift_master_default_subdomain=${INFRA_IPS[0]}.nip.io" >> ${MY_INVENTORY_FILE}
+for ip in ${INFRA_IPS}
+do
+    echo "openshift_master_default_subdomain=${ip}.nip.io" >> ${MY_INVENTORY_FILE}
+break
+done
+
 echo "oreg_url=openshift/origin-\${component}:${IMAGES_VERSION}" >> ${MY_INVENTORY_FILE}
 echo "[masters]" >> ${MY_INVENTORY_FILE}
 echo "origin-master.${MASTER_IP}.nip.io openshift_hostname=origin-master.${MASTER_IP}.nip.io" >> ${MY_INVENTORY_FILE}
 echo "[nodes]" >> ${MY_INVENTORY_FILE}
 echo "origin-master.${MASTER_IP}.nip.io openshift_hostname=origin-master.${MASTER_IP}.nip.io" >> ${MY_INVENTORY_FILE}
-for i in ${!INFRA_IPS[@]}
+id=1
+for ip in ${INFRA_IPS}
 do
-    ip=${INFRA_IPS[${i}]}
-    let id=${i}+1
     echo "origin-infra${id}.${ip}.nip.io openshift_hostname=origin-infra${id}.${ip}.nip.io openshift_node_labels=\"{'region': 'infra', 'zone': 'default'}\"" >> ${MY_INVENTORY_FILE}
+    let id=${id}+1
 done
-for i in ${!COMPUTE_IPS[@]}
+
+id=1
+for ip in ${COMPUTE_IPS}
 do
-    ip=${COMPUTE_IPS[$i]}
-    let id=${i}+1
     echo "origin-compute${id}.${ip}.nip.io openshift_hostname=origin-compute${id}.${ip}.nip.io openshift_node_labels=\"{'region': 'primary', 'zone': 'default'}\" " >> ${MY_INVENTORY_FILE}
+    let id=${id}+1
 done
 cat ${MY_INVENTORY_FILE}
 
