@@ -34,21 +34,26 @@ cp ${ID_FILE} ${WORKSPACE_ID_FILE}
 
 cp ${INVENTORY_FILE} ${MY_INVENTORY_FILE}
 
-echo "openshift_master_default_subdomain=${MASTER_IP}.nip.io" >> ${MY_INVENTORY_FILE}
+echo "openshift_master_default_subdomain=${INFRA_IPS[0]}.nip.io" >> ${MY_INVENTORY_FILE}
 echo "oreg_url=openshift/origin-\${component}:${IMAGES_VERSION}" >> ${MY_INVENTORY_FILE}
 echo "[masters]" >> ${MY_INVENTORY_FILE}
 echo "origin-master.${MASTER_IP}.nip.io openshift_hostname=origin-master.${MASTER_IP}.nip.io" >> ${MY_INVENTORY_FILE}
 echo "[nodes]" >> ${MY_INVENTORY_FILE}
 echo "origin-master.${MASTER_IP}.nip.io openshift_hostname=origin-master.${MASTER_IP}.nip.io" >> ${MY_INVENTORY_FILE}
-for ip in $INFRA_IPS
+for i in ${!INFRA_IPS[@]}
 do
-    echo "origin-infra01.${ip}.nip.io openshift_hostname=origin-infra01.${ip}.nip.io openshift_node_labels=\"{'region': 'infra', 'zone': 'default'}\"" >> ${MY_INVENTORY_FILE}
+    ip=${INFRA_IPS[${i}]}
+    let id=${i}+1
+    echo "origin-infra${id}.${ip}.nip.io openshift_hostname=origin-infra${id}.${ip}.nip.io openshift_node_labels=\"{'region': 'infra', 'zone': 'default'}\"" >> ${MY_INVENTORY_FILE}
 done
-for ip in $COMPUTE_IPS
+for i in ${!COMPUTE_IPS[@]}
 do
-    echo "origin-compute01.${ip}.nip.io openshift_hostname=origin-compute01.${ip}.nip.io openshift_node_labels=\"{'region': 'primary', 'zone': 'default'}\" " >> ${MY_INVENTORY_FILE}
+    ip=${COMPUTE_IPS[$i]}
+    let id=${i}+1
+    echo "origin-compute${id}.${ip}.nip.io openshift_hostname=origin-compute${id}.${ip}.nip.io openshift_node_labels=\"{'region': 'primary', 'zone': 'default'}\" " >> ${MY_INVENTORY_FILE}
 done
 cat ${MY_INVENTORY_FILE}
+
 
 if [ -n "${ROOT_PASSWORD}" ]; then
     sudo su - -c "source ${COPY_ID} ${ROOT_PASSWORD} ${MASTER_IP} ${INFRA_IPS} ${COMPUTE_IPS}"
